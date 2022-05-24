@@ -16,13 +16,29 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
+
         const bikePartCollection = client.db('bike-manufacturer').collection('bikeparts');
+        const bookingCollection = client.db('bike-manufacturer').collection('booking');
 
         app.get('/bikepart', async(req, res) => {
             const query = {};
             const cursor = bikePartCollection.find(query);
             const bikeParts = await cursor.toArray();
             res.send(bikeParts);
+        })
+
+        app.get('/booking', async(req, res) => {
+            const myEmail = req.query.myEmail;
+            const query = { myEmail: myEmail };
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
+
+        })
+
+        app.post('/booking', async(req, res) => {
+            const booking = req.body;
+            const result = await bookingCollection.insertOne(booking);
+            res.send(result);
         })
 
     } finally {
