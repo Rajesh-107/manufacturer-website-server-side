@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
@@ -12,6 +13,9 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4tlkf.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+
 
 async function run() {
     try {
@@ -37,12 +41,15 @@ async function run() {
                 $set: user,
             };
             const result = await userCollection.updateOne(filter, updateDoc, options)
-            res.send(result);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '24h' })
+            res.send({ result, token });
         })
 
 
         app.get('/booking', async(req, res) => {
             const myEmail = req.query.myEmail;
+            const authorization = req.headers.authorization;
+            console.log('auth header', authorization);
             const query = { myEmail: myEmail };
             const bookings = await bookingCollection.find(query).toArray();
             res.send(bookings);
