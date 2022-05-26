@@ -81,7 +81,7 @@ async function run() {
 
         })
 
-        app.put('/user/:email', verifyJWT, async(req, res) => {
+        app.put('/user/:email', async(req, res) => {
             const email = req.params.email;
             const user = req.body;
             const filter = { email: email };
@@ -119,6 +119,18 @@ async function run() {
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
+        app.delete('/product/:email', verifyJWT, async(req, res) => {
+            const productName = req.params.productName; //change here
+            const filter = { productName: productName }
+            const result = await productCollection.deleteOne(filter);
+            res.send(result);
+        })
+
+        app.get('/product', verifyJWT, async(req, res) => {
+            const products = await productCollection.find().toArray();
+            res.send(products);
+        })
+
 
         app.post('/booking', async(req, res) => {
             const booking = req.body;
